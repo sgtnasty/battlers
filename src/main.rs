@@ -133,7 +133,7 @@ impl Player {
         let dy_normalized = (target.y - self.loc.y) / distance;
         let new_x = self.loc.x + dx_normalized * self.speed.curr as f32;
         let new_y = self.loc.y + dy_normalized * self.speed.curr as f32;
-        info!("{}:{} moved to {}:{}", self.loc.x, self.loc.y, new_x, new_y);
+        debug!("{}:{} moved to {}:{}", self.loc.x, self.loc.y, new_x, new_y);
         self.loc.x = new_x;
         self.loc.y = new_y;
         info!("{} moved to {:?}", self.name, self.loc);
