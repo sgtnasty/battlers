@@ -1,9 +1,9 @@
 
 use core::f32;
 use std::collections::VecDeque;
-
 use rand::{rngs::ThreadRng, Rng};
 use tracing::{info, debug, error, warn};
+mod names;
 
 const VERSION: &str = env!("CARGO_PKG_VERSION");
 const MAX_TURNS: i32 = 256;
@@ -220,9 +220,9 @@ fn main() {
     // initialize the random number generator
     let mut rng: ThreadRng = rand::rng();
 
-    let mut p1 = Player::new("Fred");
-    let mut p2 = Player::new("John");
-    let mut p3 = Player::new("Mike");
+    let mut p1 = Player::new(names::get_random_name(&mut rng));
+    let mut p2 = Player::new(names::get_random_name(&mut rng));
+    let mut p3 = Player::new(names::get_random_name(&mut rng));
     p1.randomize(&mut rng);
     p2.randomize(&mut rng);
     p3.randomize(&mut rng);
