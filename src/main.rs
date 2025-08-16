@@ -193,6 +193,9 @@ pub fn get_nearest(&mut self, source: &Player) -> Option<(usize, &mut Player)> {
                         drop(self.players.remove(idx));
                     }
                 }
+                else {
+                    info!("{} missed", player.name);
+                }
             } else {
                 let distance = player.loc.distance(&nearest_player.loc);
                 info!("{} is moving towards {} at a distance of {}", player.name, nearest_player.name, distance);
