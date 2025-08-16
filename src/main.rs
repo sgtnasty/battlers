@@ -82,8 +82,10 @@ impl Location {
         i.sqrt()
     }
     pub fn randomize(&mut self, rng: &mut ThreadRng) {
-        self.x = roll3d6(rng) as f32;
-        self.y = roll3d6(rng) as f32;
+        let roll_x = rng.random_range(1..=60);
+        let roll_y = rng.random_range(1..=60);
+        self.x = roll_x as f32;
+        self.y = roll_y as f32;
         self.z = 0.0;
     }
 }
@@ -131,6 +133,7 @@ impl Player {
         let dy_normalized = (target.y - self.loc.y) / distance;
         let new_x = self.loc.x + dx_normalized * self.speed.curr as f32;
         let new_y = self.loc.y + dy_normalized * self.speed.curr as f32;
+        info!("{}:{} moved to {}:{}", self.loc.x, self.loc.y, new_x, new_y);
         self.loc.x = new_x;
         self.loc.y = new_y;
         info!("{} moved to {:?}", self.name, self.loc);
@@ -178,7 +181,7 @@ pub fn get_nearest(&mut self, source: &Player) -> Option<(usize, &mut Player)> {
     }
     pub fn run_simulation(&mut self, rng: &mut ThreadRng) -> i32 {
         while self.players.len() > 1 {
-            let player = self.players.pop_front().unwrap();
+            let mut player = self.players.pop_front().unwrap();
             let (idx, nearest_player) = self.get_nearest(&player).unwrap();
             if player.in_range(&nearest_player.loc) {
                 info!("{} is in range of {}", player.name, nearest_player.name);
@@ -191,7 +194,9 @@ pub fn get_nearest(&mut self, source: &Player) -> Option<(usize, &mut Player)> {
                     }
                 }
             } else {
-                info!("{} is moving towards {}", player.name, nearest_player.name);
+                let distance = player.loc.distance(&nearest_player.loc);
+                info!("{} is moving towards {} at a distance of {}", player.name, nearest_player.name, distance);
+                player.move_towards(&nearest_player.loc);
             }
             self.players.push_back(player);
             self.turns += 1;
