@@ -3,7 +3,7 @@ use core::f32;
 use std::collections::VecDeque;
 
 use rand::{rngs::ThreadRng, Rng};
-use tracing::{info, debug, error, warn, trace};
+use tracing::{info, debug, error, warn};
 
 const VERSION: &str = env!("CARGO_PKG_VERSION");
 const MAX_TURNS: i32 = 256;
@@ -222,13 +222,24 @@ fn main() {
 
     let mut p1 = Player::new("Fred");
     let mut p2 = Player::new("John");
+    let mut p3 = Player::new("Mike");
     p1.randomize(&mut rng);
     p2.randomize(&mut rng);
+    p3.randomize(&mut rng);
     info!("{:?}", p1);
     info!("{:?}", p2);
+    info!("{:?}", p3);
 
     let mut game = Game::new();
     game.players.push_back(p1);
     game.players.push_back(p2);
+    game.players.push_back(p3);
     let turns_elapsed = game.run_simulation(&mut rng);
+    if game.players.len() == 1 {
+        info!("{} is the winner in {} turns with {} of {} hits left", 
+            game.players[0].name, turns_elapsed, game.players[0].armor.curr, game.players[0].armor.base);
+    }
+    else {
+        error!("inconclusive results")
+    }
 }
