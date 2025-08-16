@@ -1,11 +1,12 @@
 
 use core::f32;
+use std::collections::VecDeque;
 
 use rand::{rngs::ThreadRng, Rng};
 use tracing::{info, debug, error, warn, trace};
 
 const VERSION: &str = env!("CARGO_PKG_VERSION");
-const MAXTURNS: i32 = 256;
+const MAX_TURNS: i32 = 256;
 
 pub fn roll3d6(rng: &mut ThreadRng) -> i32 {
     let roll1 = rng.random_range(1..=6);
@@ -154,36 +155,22 @@ impl Player {
 
 pub struct Game {
     pub turns: i32,
-    pub players: Vec<Player>
+    pub players: VecDeque<Player>
 }
 
 impl Game {
     pub fn new() -> Self {
-        Game { turns: 0, players: Vec::new() }
+        Game { turns: 0, players: VecDeque::new() }
     }
-    pub fn get_nearest(&self, source: &Player) -> Option<&Player> {
+pub fn get_nearest(&mut self, source: &Player) -> Option<(usize, &mut Player)> {
         let mut min_distance = f32::MAX;
-        let mut target: Option<&Player> = None;
-        for player in &self.players {
+        let mut target = None;
+        for (idx, player) in self.players.iter_mut().enumerate() {
             if source.name != player.name {
-                let distance = source.loc.distance(&player.loc);
+                let distance = source.loc.distance(&source.loc);
                 if distance < min_distance {
                     min_distance = distance;
-                    target = Option::Some(player);
-                }
-            }
-        }
-        target
-    }
-    pub fn get_nearest_idx(&self, source: &Player) -> Option<usize> {
-        let mut min_distance = f32::MAX;
-        let mut target: Option<usize> = None;
-        for i in 0..self.players.len() {
-            if source.name != self.players[i].name {
-                let distance = source.loc.distance(&self.players[i].loc);
-                if distance < min_distance {
-                    min_distance = distance;
-                    target = Option::Some(i);
+                    target = Some((idx, player));
                 }
             }
         }
@@ -191,24 +178,24 @@ impl Game {
     }
     pub fn run_simulation(&mut self, rng: &mut ThreadRng) -> i32 {
         while self.players.len() > 1 {
-            for i in 0..self.players.len() {
-                let target_idx = self.get_nearest_idx(&self.players[i]).unwrap();
-                if self.players[i].in_range(&self.players[target_idx].loc) {
-                    info!("{} is in range of {}", self.players[i].name, self.players[target_idx].name);
-                    if self.players[i].attack(&self.players[target_idx], rng) {
-                        self.players[i].damage(&mut self.players[target_idx], rng);
-                        if self.players[target_idx].is_dead() {
-                            warn!("{} defeated {}", self.players[i].name, self.players[target_idx].name);
-                            self.players.remove(target_idx);
-                        }
+            let player = self.players.pop_front().unwrap();
+            let (idx, nearest_player) = self.get_nearest(&player).unwrap();
+            if player.in_range(&nearest_player.loc) {
+                info!("{} is in range of {}", player.name, nearest_player.name);
+                if player.attack(nearest_player, rng) {
+                    let damage_done = player.damage(nearest_player, rng);
+                    info!("{} hit {} for {} damage", player.name, nearest_player.name, damage_done);
+                    if nearest_player.is_dead() {
+                        warn!("{} defeated {}", player.name, nearest_player.name);
+                        drop(self.players.remove(idx));
                     }
                 }
-                else {
-                    info!("{} is moving towards {}", self.players[i].name, self.players[target_idx].name);
-                }
+            } else {
+                info!("{} is moving towards {}", player.name, nearest_player.name);
             }
+            self.players.push_back(player);
             self.turns += 1;
-            if self.turns > MAXTURNS {
+            if self.turns > MAX_TURNS {
                 warn!("Battle is taking too many turns: {}", self.turns);
                 break;
             }
@@ -233,7 +220,7 @@ fn main() {
     info!("{:?}", p2);
 
     let mut game = Game::new();
-    game.players.push(p1);
-    game.players.push(p2);
+    game.players.push_back(p1);
+    game.players.push_back(p2);
     let turns_elapsed = game.run_simulation(&mut rng);
 }
