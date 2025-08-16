@@ -1,8 +1,11 @@
 
+use core::f32;
+
 use rand::{rngs::ThreadRng, Rng};
 use tracing::{info, debug, error, warn, trace};
 
 const VERSION: &str = env!("CARGO_PKG_VERSION");
+const MAXTURNS: i32 = 256;
 
 pub fn roll3d6(rng: &mut ThreadRng) -> i32 {
     let roll1 = rng.random_range(1..=6);
@@ -56,7 +59,7 @@ impl PlayerAttribute {
     }
 }
 
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct Location {
     pub x: f32,
     pub y: f32,
@@ -163,7 +166,7 @@ impl Game {
         let mut target: Option<&Player> = None;
         for player in &self.players {
             if source.name != player.name {
-                let distance = source.loc.distance(&source.loc);
+                let distance = source.loc.distance(&player.loc);
                 if distance < min_distance {
                     min_distance = distance;
                     target = Option::Some(player);
@@ -172,17 +175,42 @@ impl Game {
         }
         target
     }
-    pub fn run_simulation(&mut self) -> i32 {
+    pub fn get_nearest_idx(&self, source: &Player) -> Option<usize> {
+        let mut min_distance = f32::MAX;
+        let mut target: Option<usize> = None;
+        for i in 0..self.players.len() {
+            if source.name != self.players[i].name {
+                let distance = source.loc.distance(&self.players[i].loc);
+                if distance < min_distance {
+                    min_distance = distance;
+                    target = Option::Some(i);
+                }
+            }
+        }
+        target
+    }
+    pub fn run_simulation(&mut self, rng: &mut ThreadRng) -> i32 {
         while self.players.len() > 1 {
-            for player in self.players.iter_mut() {
-                let target = self.get_nearest(player).unwrap();
-                if player.in_range(&target.loc) {
-                    info!("{} is in range of {}", player.name, target.name);
+            for i in 0..self.players.len() {
+                let target_idx = self.get_nearest_idx(&self.players[i]).unwrap();
+                if self.players[i].in_range(&self.players[target_idx].loc) {
+                    info!("{} is in range of {}", self.players[i].name, self.players[target_idx].name);
+                    if self.players[i].attack(&self.players[target_idx], rng) {
+                        self.players[i].damage(&mut self.players[target_idx], rng);
+                        if self.players[target_idx].is_dead() {
+                            warn!("{} defeated {}", self.players[i].name, self.players[target_idx].name);
+                            self.players.remove(target_idx);
+                        }
+                    }
                 }
                 else {
-                    player.move_towards(&target.loc);
-                    info!("{} is moving towards {}", player.name, target.name);
+                    info!("{} is moving towards {}", self.players[i].name, self.players[target_idx].name);
                 }
+            }
+            self.turns += 1;
+            if self.turns > MAXTURNS {
+                warn!("Battle is taking too many turns: {}", self.turns);
+                break;
             }
         }
         self.turns
@@ -207,5 +235,5 @@ fn main() {
     let mut game = Game::new();
     game.players.push(p1);
     game.players.push(p2);
-    let turns_elapsed = game.run_simulation();
+    let turns_elapsed = game.run_simulation(&mut rng);
 }
