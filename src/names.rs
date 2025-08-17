@@ -1,7 +1,7 @@
 
 use rand::prelude::IndexedRandom;
 use rand::rngs::ThreadRng;
-use tracing::{info, debug, error, warn};
+use tracing::error;
 
 const NAMES: &str = r"Abban Adomn Adhamh Adhamhnán Adamnan Eunan Adanodan Ailbhe Ailbe Alby
 Ailgel Ailill Ailín Aininn Ainmire Airechtach Airmedach Alabhaois Alaios
