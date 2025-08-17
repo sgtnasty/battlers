@@ -1,4 +1,3 @@
-
 use rand::prelude::IndexedRandom;
 use rand::rngs::ThreadRng;
 use tracing::error;
@@ -256,8 +255,7 @@ fn random_word_from_text<'a>(text: &'a str, rng: &mut ThreadRng) -> Option<&'a s
 pub fn get_random_name(rng: &mut ThreadRng) -> &str {
     if let Some(name) = random_word_from_text(NAMES, rng) {
         name
-    }
-    else {
+    } else {
         error!("unable to get a random string from names list!");
         &""
     }

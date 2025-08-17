@@ -1,6 +1,5 @@
-
 use core::f32;
-use rand::{rngs::ThreadRng, Rng};
+use rand::{Rng, rngs::ThreadRng};
 use tracing::debug;
 
 use crate::dice;
@@ -12,7 +11,7 @@ pub enum Attribute {
     Armor,
     Power,
     Speed,
-    Range
+    Range,
 }
 
 #[derive(Debug)]
@@ -24,7 +23,11 @@ pub struct PlayerAttribute {
 
 impl PlayerAttribute {
     pub fn new(name: Attribute) -> Self {
-        PlayerAttribute { name: name, base: 0, curr: 0 }
+        PlayerAttribute {
+            name: name,
+            base: 0,
+            curr: 0,
+        }
     }
     pub fn set(&mut self, value: i32) {
         self.base = value;
@@ -79,20 +82,20 @@ pub struct Player {
     pub power: PlayerAttribute,
     pub speed: PlayerAttribute,
     pub range: PlayerAttribute,
-    pub loc: Location
+    pub loc: Location,
 }
 
 impl Player {
     pub fn new(name: &str) -> Self {
-        Player { 
+        Player {
             name: String::from(name),
             attack: PlayerAttribute::new(Attribute::Attack),
-            defense: PlayerAttribute::new(Attribute::Defense), 
-            armor: PlayerAttribute::new(Attribute::Armor), 
-            power: PlayerAttribute::new(Attribute::Power), 
-            speed: PlayerAttribute::new(Attribute::Speed), 
-            range: PlayerAttribute::new(Attribute::Range), 
-            loc: Location::new(0.0, 0.0, 0.0)
+            defense: PlayerAttribute::new(Attribute::Defense),
+            armor: PlayerAttribute::new(Attribute::Armor),
+            power: PlayerAttribute::new(Attribute::Power),
+            speed: PlayerAttribute::new(Attribute::Speed),
+            range: PlayerAttribute::new(Attribute::Range),
+            loc: Location::new(0.0, 0.0, 0.0),
         }
     }
     pub fn randomize(&mut self, rng: &mut ThreadRng) {

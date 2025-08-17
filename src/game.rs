@@ -1,21 +1,23 @@
-
-use core::f32;
-use std::collections::VecDeque;
-use rand::rngs::ThreadRng;
-use tracing::{info, warn};
-use crate::player;
 use crate::MAX_TURNS;
+use crate::player;
+use core::f32;
+use rand::rngs::ThreadRng;
+use std::collections::VecDeque;
+use tracing::{info, warn};
 
 pub struct Game {
     pub turns: i32,
-    pub players: VecDeque<player::Player>
+    pub players: VecDeque<player::Player>,
 }
 
 impl Game {
     pub fn new() -> Self {
-        Game { turns: 0, players: VecDeque::new() }
+        Game {
+            turns: 0,
+            players: VecDeque::new(),
+        }
     }
-pub fn get_nearest(&mut self, source: &player::Player) -> Option<(usize, &mut player::Player)> {
+    pub fn get_nearest(&mut self, source: &player::Player) -> Option<(usize, &mut player::Player)> {
         let mut min_distance = f32::MAX;
         let mut target = None;
         for (idx, player) in self.players.iter_mut().enumerate() {
@@ -37,18 +39,23 @@ pub fn get_nearest(&mut self, source: &player::Player) -> Option<(usize, &mut pl
                 info!("{} is in range of {}", player.name, nearest_player.name);
                 if player.attack(nearest_player, rng) {
                     let damage_done = player.damage(nearest_player, rng);
-                    info!("{} hit {} for {} damage", player.name, nearest_player.name, damage_done);
+                    info!(
+                        "{} hit {} for {} damage",
+                        player.name, nearest_player.name, damage_done
+                    );
                     if nearest_player.is_dead() {
                         warn!("{} defeated {}", player.name, nearest_player.name);
                         drop(self.players.remove(idx));
                     }
-                }
-                else {
+                } else {
                     info!("{} missed", player.name);
                 }
             } else {
                 let distance = player.loc.distance(&nearest_player.loc);
-                info!("{} is moving towards {} at a distance of {}", player.name, nearest_player.name, distance);
+                info!(
+                    "{} is moving towards {} at a distance of {}",
+                    player.name, nearest_player.name, distance
+                );
                 player.move_towards(&nearest_player.loc);
             }
             self.players.push_back(player);

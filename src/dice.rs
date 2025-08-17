@@ -1,5 +1,4 @@
-
-use rand::{rngs::ThreadRng, Rng};
+use rand::{Rng, rngs::ThreadRng};
 use tracing::debug;
 
 pub fn roll3d6(rng: &mut ThreadRng) -> i32 {

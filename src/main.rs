@@ -1,10 +1,9 @@
-
-use rand::{rngs::ThreadRng, Rng};
-use tracing::{info, error};
-mod names;
-mod player;
+use rand::{Rng, rngs::ThreadRng};
+use tracing::{error, info};
 mod dice;
 mod game;
+mod names;
+mod player;
 
 const VERSION: &str = env!("CARGO_PKG_VERSION");
 const MAX_TURNS: i32 = 256;
@@ -27,10 +26,14 @@ fn main() {
     info!("{} players enter the skirmish", game.players.len());
     let turns_elapsed = game.run_simulation(&mut rng);
     if game.players.len() == 1 {
-        info!("{} is the winner in {} turns with {} of {} hits left", 
-            game.players[0].name, turns_elapsed, game.players[0].armor.curr, game.players[0].armor.base);
-    }
-    else {
+        info!(
+            "{} is the winner in {} turns with {} of {} hits left",
+            game.players[0].name,
+            turns_elapsed,
+            game.players[0].armor.curr,
+            game.players[0].armor.base
+        );
+    } else {
         error!("inconclusive results")
     }
 }
