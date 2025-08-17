@@ -220,20 +220,14 @@ fn main() {
     // initialize the random number generator
     let mut rng: ThreadRng = rand::rng();
 
-    let mut p1 = Player::new(names::get_random_name(&mut rng));
-    let mut p2 = Player::new(names::get_random_name(&mut rng));
-    let mut p3 = Player::new(names::get_random_name(&mut rng));
-    p1.randomize(&mut rng);
-    p2.randomize(&mut rng);
-    p3.randomize(&mut rng);
-    info!("{:?}", p1);
-    info!("{:?}", p2);
-    info!("{:?}", p3);
-
     let mut game = Game::new();
-    game.players.push_back(p1);
-    game.players.push_back(p2);
-    game.players.push_back(p3);
+    for _ in 0..rng.random_range(2..10) {
+        let mut player = Player::new(names::get_random_name(&mut rng));
+        player.randomize(&mut rng);
+        info!("{:?}", player);
+        game.players.push_back(player);
+    }
+
     let turns_elapsed = game.run_simulation(&mut rng);
     if game.players.len() == 1 {
         info!("{} is the winner in {} turns with {} of {} hits left", 
