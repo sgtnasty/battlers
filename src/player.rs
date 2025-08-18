@@ -1,6 +1,6 @@
 use core::f32;
 use rand::{Rng, rngs::ThreadRng};
-use tracing::debug;
+use tracing::{debug, warn};
 
 use crate::dice;
 
@@ -130,6 +130,10 @@ impl Player {
     }
     pub fn damage(&self, target: &mut Player, rng: &mut ThreadRng) -> i32 {
         let damage_inflicted = dice::roll1d8(rng) + self.power.bonus();
+        if damage_inflicted < 1 {
+            warn!("no damage inflicted!");
+            return 0
+        }
         target.armor.curr -= damage_inflicted;
         damage_inflicted
     }
