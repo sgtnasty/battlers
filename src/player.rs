@@ -38,8 +38,7 @@ impl PlayerAttribute {
         return bv as i32;
     }
     pub fn randomize(&mut self, rng: &mut ThreadRng) {
-        self.base = dice::roll3d6(rng);
-        self.curr = self.base;
+        self.set(dice::roll3d6(rng));
     }
 }
 
@@ -103,7 +102,7 @@ impl Player {
         self.defense.randomize(rng);
         self.armor.randomize(rng);
         self.power.randomize(rng);
-        self.speed.randomize(rng);
+        self.speed.set(dice::roll1d8(rng) + 10);
         self.range.randomize(rng);
         self.loc.randomize(rng);
     }
