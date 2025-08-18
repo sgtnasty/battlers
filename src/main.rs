@@ -1,6 +1,6 @@
-use rand::{Rng, rngs::ThreadRng};
+use rand::rngs::ThreadRng;
 use tracing::{error, info};
-use clap::{error, Parser};
+use clap::Parser;
 mod dice;
 mod game;
 mod names;
@@ -12,7 +12,7 @@ const MAX_PLAYERS: u8 = 64;
 
 #[derive(Parser, Debug)]
 #[command(name = "battlers")]
-#[command(version = "0.1.0")]
+#[command(version = "2.0.0")]
 #[command(about = "Simulation of a skirmish", long_about = None)]
 struct Args {
     /// Number of random players to siumulate
