@@ -7,9 +7,9 @@ players:
       speed: 12
       range: 12
       loc:
-        - x: 5
-          y: 6
-          z: 0
+        x: 5
+        y: 6
+        z: 0
     - name: John
       attack: 18
       defense: 10
@@ -18,9 +18,9 @@ players:
       speed: 10
       range: 2
       loc:
-        - x: 19
-          y: 40
-          z: 0
+        x: 19
+        y: 40
+        z: 0
     - name: Sam
       attack: 8
       defense: 18
@@ -29,6 +29,6 @@ players:
       speed: 8
       range: 18
       loc:
-        - x: 43
-          y: 12
-          z: 0
+        x: 43
+        y: 12
+        z: 0
