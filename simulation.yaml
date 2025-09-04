@@ -1,0 +1,34 @@
+players:
+    - name: Fred
+      attack: 12
+      defense: 12
+      armor: 12
+      power: 12
+      speed: 12
+      range: 12
+      loc:
+        - x: 5
+          y: 6
+          z: 0
+    - name: John
+      attack: 18
+      defense: 10
+      armor: 10
+      power: 18
+      speed: 10
+      range: 2
+      loc:
+        - x: 19
+          y: 40
+          z: 0
+    - name: Sam
+      attack: 8
+      defense: 18
+      armor: 18
+      power: 8
+      speed: 8
+      range: 18
+      loc:
+        - x: 43
+          y: 12
+          z: 0
