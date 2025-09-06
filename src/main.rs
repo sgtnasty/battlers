@@ -6,6 +6,8 @@ mod game;
 mod names;
 mod player;
 mod serialization;
+mod app;
+mod tui;
 
 const VERSION: &str = env!("CARGO_PKG_VERSION");
 const MAX_TURNS: i32 = 256;
@@ -22,52 +24,66 @@ struct Args {
     /// Path to simulation configuration YAML file
     #[arg(short, long)]
     config: Option<String>,
+    /// Enable TUI mode for interactive battle visualization
+    #[arg(short, long)]
+    tui: bool,
 }
 
 fn main() {
-    // turn on loggging
-    tracing_subscriber::fmt::init();
-    info!("battlers/{}", VERSION);
-
     // get the command arguments
     let args = Args::parse();
+    
+    if args.tui {
+        // Run in TUI mode
+        run_tui_mode(args);
+    } else {
+        // Run in CLI mode
+        run_cli_mode(args);
+    }
+}
+
+fn run_tui_mode(args: Args) {
+    // Initialize terminal
+    let terminal = match tui::setup_terminal() {
+        Ok(terminal) => terminal,
+        Err(e) => {
+            eprintln!("Failed to setup terminal: {}", e);
+            return;
+        }
+    };
+    
+    // Create app and load players
+    let mut app = app::App::new();
+    let players = load_players(args);
+    app.add_players(players);
+    
+    // Create TUI and run
+    let mut tui_instance = tui::Tui::new(terminal);
+    if let Err(e) = tui_instance.run(app) {
+        eprintln!("TUI error: {}", e);
+    }
+    
+    // Restore terminal
+    if let Err(e) = tui::restore_terminal() {
+        eprintln!("Failed to restore terminal: {}", e);
+    }
+}
+
+fn run_cli_mode(args: Args) {
+    // turn on logging
+    tracing_subscriber::fmt::init();
+    info!("battlers/{}", VERSION);
 
     // initialize the random number generator
     let mut rng: ThreadRng = rand::rng();
 
     // create a new game engine and add players
     let mut game = game::Game::new();
+    let players = load_players(args);
     
-    match args.config {
-        Some(config_path) => {
-            // Load players from YAML configuration
-            match serialization::load_simulation_config(&config_path) {
-                Ok(config) => {
-                    let players = serialization::players_from_config(config);
-                    for player in players {
-                        game.players.push_back(player);
-                    }
-                }
-                Err(e) => {
-                    error!("Failed to load configuration from {}: {}", config_path, e);
-                    return;
-                }
-            }
-        }
-        None => {
-            // Generate random players
-            if args.players > MAX_PLAYERS {
-                error!("too many players requested, {} is the max", MAX_PLAYERS);
-                return;
-            }
-            
-            for _ in 0..args.players {
-                let mut player = player::Player::new(names::get_random_name(&mut rng));
-                player.randomize(&mut rng);
-                info!("{:?}", player);
-                game.players.push_back(player);
-            }
-        }
+    for player in players {
+        info!("{:?}", player);
+        game.players.push_back(player);
     }
     
     info!("{} players enter the skirmish", game.players.len());
@@ -84,5 +100,37 @@ fn main() {
         );
     } else {
         error!("inconclusive results")
+    }
+}
+
+fn load_players(args: Args) -> Vec<player::Player> {
+    let mut rng: ThreadRng = rand::rng();
+    
+    match args.config {
+        Some(config_path) => {
+            // Load players from YAML configuration
+            match serialization::load_simulation_config(&config_path) {
+                Ok(config) => serialization::players_from_config(config),
+                Err(e) => {
+                    error!("Failed to load configuration from {}: {}", config_path, e);
+                    Vec::new()
+                }
+            }
+        }
+        None => {
+            // Generate random players
+            if args.players > MAX_PLAYERS {
+                error!("too many players requested, {} is the max", MAX_PLAYERS);
+                return Vec::new();
+            }
+            
+            let mut players = Vec::new();
+            for _ in 0..args.players {
+                let mut player = player::Player::new(names::get_random_name(&mut rng));
+                player.randomize(&mut rng);
+                players.push(player);
+            }
+            players
+        }
     }
 }

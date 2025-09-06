@@ -22,7 +22,7 @@ impl Game {
         let mut target = None;
         for (idx, player) in self.players.iter_mut().enumerate() {
             if source.name != player.name {
-                let distance = source.loc.distance(&source.loc);
+                let distance = source.loc.distance(&player.loc);
                 if distance < min_distance {
                     min_distance = distance;
                     target = Some((idx, player));
